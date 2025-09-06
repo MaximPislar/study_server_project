@@ -31,14 +31,14 @@ class DatabaseHelper:
             expire_on_commit=False,
         )
 
-    async def dispose(self) -> None:
+    async def dispose(self) -> None:    # добавить в лайфспан в main.py
         await self.engine.dispose()
 
     async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.session_factory() as session:
             yield session
 
-# здесь инициируем дб_хедпер когда появятся настройки
+# здесь инициируем дб_хеlпер когда появятся настройки
 #
 # db_helper = DatabaseHelper(
 #     url=str(settings.db.url),

@@ -3,13 +3,14 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-# from database.db_helper import db_helper   импортировать после инициализации
+from database.db_helper import db_helper
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    # db_helper.dispose()
+    db_helper.dispose()
+
 
 app = FastAPI(lifespan=lifespan)
 

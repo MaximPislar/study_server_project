@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     AsyncSession,
 )
+from fastapi_app.core import settings
 
 
 class DatabaseHelper:
@@ -38,12 +39,11 @@ class DatabaseHelper:
         async with self.session_factory() as session:
             yield session
 
-# здесь инициируем дб_хеlпер когда появятся настройки
-#
-# db_helper = DatabaseHelper(
-#     url=str(settings.db.url),
-#     echo=settings.db.echo,
-#     echo_pool=settings.db.echo_pool,
-#     pool_size=settings.db.pool_size,
-#     max_overflow=settings.db.max_overflow,
-# )
+
+db_helper = DatabaseHelper(
+    url=str(settings.db.url),
+    echo=settings.db.echo,
+    echo_pool=settings.db.echo_pool,
+    pool_size=settings.db.pool_size,
+    max_overflow=settings.db.max_overflow,
+)

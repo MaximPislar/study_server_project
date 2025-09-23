@@ -1,7 +1,6 @@
-
 from typing import Annotated
 
-from pydantic import BaseModel, EmailStr,  Field, StringConstraints
+from pydantic import BaseModel, EmailStr, Field, StringConstraints
 
 
 class UserBaseClass(BaseModel):
@@ -17,4 +16,8 @@ class User(UserBaseClass):
 
 
 class UserRegistration(User):
+    pass
+
+
+class UserResponse(UserBaseClass):
     pass

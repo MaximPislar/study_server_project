@@ -1,5 +1,6 @@
-from .user import UserRegistration
+from .user import UserRegistration, UserResponse
 
 __all__ = [
-    "UserRegistration"
+    "UserRegistration",
+    "UserResponse"
 ]

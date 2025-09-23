@@ -32,10 +32,14 @@ async def check_user_uniqueness(
 
 
 async def create_user(
-        session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-        user_creds: Annotated[UserRegistration, Body()],
-        is_user_unique: Annotated[bool, Depends(check_user_uniqueness)]
+        session: AsyncSession,
+        user_creds: UserRegistration
 ) -> User:
+
+    await check_user_uniqueness(
+        session,
+        user_creds
+    )
 
     new_user = User(
         username=user_creds.username,

@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 
-from database.db_helper import db_helper
+from fastapi_app.database import db_helper
 
 
 @asynccontextmanager

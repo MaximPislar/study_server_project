@@ -1,14 +1,19 @@
-from pydantic import BaseModel, conint, EmailStr, constr
+
+from typing import Annotated
+
+from pydantic import BaseModel, EmailStr,  Field, StringConstraints
 
 
 class UserBaseClass(BaseModel):
     username: str
-    age: conint(gt=18)
+    age: Annotated[int, Field(strict=True, gt=18)]
     email: EmailStr
 
 
 class User(UserBaseClass):
-    password: constr(min_length=8, max_length=16)
+    password: Annotated[
+        str,
+        StringConstraints(min_length=8, max_length=16)]
 
 
 class UserRegistration(User):

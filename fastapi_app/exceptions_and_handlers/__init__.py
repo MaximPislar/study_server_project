@@ -1,4 +1,4 @@
-from exceptions import UserNotFoundException, InvalidUserDataException
+from .exceptions import UserNotFoundException, InvalidUserDataException
 
 __all__ = [
     "UserNotFoundException",

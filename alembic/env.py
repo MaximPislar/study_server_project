@@ -8,7 +8,8 @@ from sqlalchemy import pool
 from alembic import context
 
 from fastapi_app.core.config import settings
-from fastapi_app.database.models import Base
+from fastapi_app.database.models.base import Base
+from fastapi_app.database.models.user import User
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -85,3 +86,9 @@ def run_migrations_online():
     """Run migrations in 'online' mode."""
 
     asyncio.run(run_async_migrations())
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()

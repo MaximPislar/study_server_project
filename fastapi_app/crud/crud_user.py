@@ -14,7 +14,6 @@ async def check_user_uniqueness(
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
         user_creds: Annotated[UserRegistration, Body()]
 ):
-
     stmt = select(User).where(
         or_(User.username == user_creds.username,
             User.email == user_creds.email)
@@ -35,7 +34,6 @@ async def create_user(
         session: AsyncSession,
         user_creds: UserRegistration
 ) -> User:
-
     await check_user_uniqueness(
         session,
         user_creds
@@ -67,6 +65,3 @@ async def get_user_by_username(
             status_code=404)
 
     return user
-
-
-

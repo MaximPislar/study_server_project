@@ -1,3 +1,4 @@
+import datetime
 from typing import Annotated
 
 from pydantic import BaseModel, EmailStr, Field, StringConstraints
@@ -20,4 +21,4 @@ class UserRegistration(User):
 
 
 class UserResponse(UserBaseClass):
-    pass
+    created_at: datetime.datetime # TODO нормальное представление времени

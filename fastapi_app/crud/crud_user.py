@@ -8,6 +8,7 @@ from fastapi_app.exceptions_and_handlers import UserNotFoundException, InvalidUs
 from fastapi_app.schemas import UserRegistration
 from fastapi_app.database import User
 from fastapi_app.database import db_helper
+from fastapi_app.auth import hash_password
 
 
 async def check_user_uniqueness(
@@ -39,10 +40,12 @@ async def create_user(
         user_creds
     )
 
+    hashed_password = hash_password(user_creds.password)
+
     new_user = User(
         username=user_creds.username,
         age=user_creds.age,
-        password=user_creds.password,
+        password=hashed_password,
         email=user_creds.email
     )
     session.add(new_user)

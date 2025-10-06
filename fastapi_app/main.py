@@ -11,7 +11,7 @@ from fastapi_app.routers.home import router as home_router  # Todo add router to
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-    db_helper.dispose()
+    await db_helper.dispose()
 
 
 app = FastAPI(lifespan=lifespan)

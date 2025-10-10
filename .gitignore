@@ -162,3 +162,5 @@ cython_debug/
 .idea/
 
 study.py
+/private.pem
+/public.pem

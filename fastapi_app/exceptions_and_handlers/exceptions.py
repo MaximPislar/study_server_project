@@ -4,26 +4,23 @@ from fastapi import HTTPException, status
 class UserNotFoundException(HTTPException):
     def __init__(
             self,
-            detail: str,
-            status_code: status.HTTP_404_NOT_FOUND
+            detail: str = "User not found"
     ):
-        super().__init__(detail=detail, status_code=status_code)
+        super().__init__(detail=detail, status_code=status.HTTP_404_NOT_FOUND)
 
 
 class InvalidUserDataException(HTTPException):
     def __init__(
             self,
-            detail: str,
-            status_code: status.HTTP_409_CONFLICT
+            detail: str = "Invalid user data"
     ):
-        super().__init__(detail=detail, status_code=status_code)
+        super().__init__(detail=detail, status_code=status.HTTP_409_CONFLICT)
 
 
 class InvalidCredentialsException(HTTPException):
     def __init__(
             self,
-            detail: str,
-            status_code: status.HTTP_401_UNAUTHORIZED,
+            detail: str = "Invalid username or password",
             headers: dict = None
     ):
         if headers is None:
@@ -31,6 +28,14 @@ class InvalidCredentialsException(HTTPException):
 
         super().__init__(
             detail=detail,
-            status_code=status_code,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             headers=headers
         )
+
+
+class UserIsInactiveException(HTTPException):
+    def __init__(
+            self,
+            detail: str = "User is inactive"
+    ):
+        super().__init__(detail=detail, status_code=status.HTTP_409_CONFLICT)

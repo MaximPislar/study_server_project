@@ -7,7 +7,7 @@ from pydantic_settings import (
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-env_path = f"{BASE_DIR}\\.env"
+env_path = BASE_DIR / ".env"
 
 
 class DatabaseConfig(BaseModel):
@@ -16,6 +16,13 @@ class DatabaseConfig(BaseModel):
     echo_pool: bool = False
     pool_size: int = 50
     max_overflow: int = 10
+
+
+class AuthJWT(BaseModel):
+    privat_key_path: Path = BASE_DIR / "private.pem"
+    public_key_path: Path = BASE_DIR / "public.pem"
+    algorithm: str = "HS256"
+    access_token_expire_minutes: int = 15
 
 
 class Settings(BaseSettings):
@@ -27,6 +34,7 @@ class Settings(BaseSettings):
     )
 
     db: DatabaseConfig
+    auth: AuthJWT = AuthJWT()
 
 
 settings = Settings()

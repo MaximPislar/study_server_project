@@ -24,9 +24,7 @@ async def check_user_uniqueness(
 
     if result:
         raise InvalidUserDataException(
-            status_code=status.HTTP_409_CONFLICT,
             detail="This username or email are already in use",
-            error_code="pridumat'_new_username"
         )
     return True
 
@@ -63,8 +61,6 @@ async def get_user_by_username(
     user = result.scalar()
     if not user:
         raise UserNotFoundException(
-            detail="Пользователя с таким именем не существует",
-            error_code="user_not_found_lol_kek",
-            status_code=404)
+            detail="Пользователя с таким именем не существует")
 
     return user

@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field, StringConstraints
 
 
 class UserBaseClass(BaseModel):
-    username: str
+    username: str  # TODO нормальная валидация
     age: Annotated[int, Field(strict=True, gt=18)]
     email: EmailStr
 
@@ -21,4 +21,4 @@ class UserRegistration(User):
 
 
 class UserResponse(UserBaseClass):
-    created_at: datetime.datetime # TODO нормальное представление времени
+    created_at: datetime.datetime

@@ -19,7 +19,7 @@ class DatabaseConfig(BaseModel):
 
 
 class AuthJWT(BaseModel):
-    privat_key_path: Path = BASE_DIR / "private.pem"
+    private_key_path: Path = BASE_DIR / "private.pem"
     public_key_path: Path = BASE_DIR / "public.pem"
     algorithm: str = "RS256"
     access_token_expire_minutes: int = 15

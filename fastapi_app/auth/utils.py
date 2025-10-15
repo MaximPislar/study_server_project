@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from typing import Union
 
 import bcrypt
 import jwt
@@ -8,8 +9,8 @@ from sqlalchemy import select
 
 from fastapi_app.core import settings
 from fastapi_app.database import User
-from fastapi_app.exceptions_and_handlers import UserIsInactiveException
-
+from fastapi_app.exceptions_and_handlers import UserIsInactiveException, InvalidUserDataException
+from fastapi_app.schemas import PayloadModel
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/security/token")
 
@@ -80,3 +81,35 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         algorithm=settings.auth.algorithm
     )
     return encoded_jwt
+
+
+def decode_acces_token(token: str) -> PayloadModel:
+    payload = jwt.decode(
+        jwt=token,
+        key=settings.auth.public_key_path.read_text(),
+        algorithms=[settings.auth.algorithm]
+    )
+    return PayloadModel(**payload)
+
+
+async def get_current_active_user_from_token(
+        token: str,
+        session: AsyncSession
+) -> User | None:
+
+    try:
+        payload: PayloadModel = decode_acces_token(token)
+
+    except jwt.exceptions.PyJWTError:
+        raise InvalidUserDataException(
+            detail="Invalid token, токен просрочился"  # TODO потестить и убрать
+        )
+
+    user = await session.get(User, payload.sub)
+
+    if user is None:
+        raise InvalidUserDataException(
+            detail="Invalid token"
+        )
+
+    return Union[User, None]

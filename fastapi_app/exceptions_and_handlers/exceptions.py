@@ -39,3 +39,11 @@ class UserIsInactiveException(HTTPException):
             detail: str = "User is inactive"
     ):
         super().__init__(detail=detail, status_code=status.HTTP_409_CONFLICT)
+
+
+class InvalidTokenException(HTTPException):
+    def __init__(
+            self,
+            detail: str = "Invalid token"
+    ):
+        super().__init__(detail=detail, status_code=status.HTTP_401_UNAUTHORIZED)

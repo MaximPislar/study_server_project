@@ -1,11 +1,13 @@
 from .exceptions import (UserNotFoundException,
                          InvalidUserDataException,
                          InvalidCredentialsException,
-                         UserIsInactiveException)
+                         UserIsInactiveException,
+                         InvalidTokenException)
 
 __all__ = [
     "UserNotFoundException",
     "InvalidUserDataException",
     "InvalidCredentialsException",
-    "UserIsInactiveException"
+    "UserIsInactiveException",
+    "InvalidTokenException"
 ]

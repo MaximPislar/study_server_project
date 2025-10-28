@@ -122,3 +122,4 @@ async def get_current_active_user_from_token(
         )
 
     return user
+

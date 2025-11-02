@@ -35,6 +35,11 @@ async def get_current_active_user_from_token(
             detail="Invalid token"
         )
 
+    if payload.get("type") != ACCESS_TOKEN:
+        raise InvalidTokenException(
+            detail="Invalid token type: access token required"
+        )
+
     try:
         user = await session.get(User, payload.get("sub"))
     except SQLAlchemyError as e:

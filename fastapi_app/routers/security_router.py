@@ -7,12 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
 from fastapi_app.auth.dependencies import get_current_active_user_from_token
-from fastapi_app.core import settings
+from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.database import db_helper, User
 from fastapi_app.schemas import UserResponse, ErrorResponseModel
 from fastapi_app.schemas.token import Token
 from fastapi_app.exceptions_and_handlers import InvalidCredentialsException
-from fastapi_app.auth import authenticate_user, create_access_token, create_refresh_token
+from fastapi_app.auth import authenticate_user, create_jwt
 
 
 router = APIRouter(
@@ -39,13 +39,15 @@ async def login(
     user_id = str(user.id)
 
     # тут мы создаём jwt токен
-    access_token = create_access_token(
+    access_token = create_jwt(
         data={"sub": user_id},
-        expires_delta=settings.auth.access_token_expire_minutes
+        expires_delta=settings.auth.access_token_expire_minutes,
+        token_type=ACCESS_TOKEN
     )
-    refresh_token = create_refresh_token(
+    refresh_token = create_jwt(
         data={"sub": user_id},
-        expires_delta=settings.auth.refresh_token_expire_days
+        expires_delta=settings.auth.refresh_token_expire_days,
+        token_type=REFRESH_TOKEN
     )
 
     return Token(

@@ -12,7 +12,8 @@ from fastapi_app.database import db_helper, User
 from fastapi_app.schemas import UserResponse, ErrorResponseModel
 from fastapi_app.schemas.token import Token
 from fastapi_app.exceptions_and_handlers import InvalidCredentialsException
-from fastapi_app.auth import authenticate_user, create_access_token
+from fastapi_app.auth import authenticate_user, create_access_token, create_refresh_token
+
 
 router = APIRouter(
     prefix="/security",
@@ -38,12 +39,19 @@ async def login(
     user_id = str(user.id)
 
     # тут мы создаём jwt токен
-    access_token_expires = timedelta(minutes=settings.auth.access_token_expire_minutes)
     access_token = create_access_token(
-        data={"sub": user_id}, expires_delta=access_token_expires
+        data={"sub": user_id},
+        expires_delta=settings.auth.access_token_expire_minutes
+    )
+    refresh_token = create_refresh_token(
+        data={"sub": user_id},
+        expires_delta=settings.auth.refresh_token_expire_days
     )
 
-    return Token(access_token=access_token)
+    return Token(
+        access_token=access_token,
+        refresh_token=refresh_token
+    )
 
 
 @router.get(
@@ -55,7 +63,7 @@ async def login(
         status.HTTP_200_OK: {"model": UserResponse},
         status.HTTP_401_UNAUTHORIZED: {"model": ErrorResponseModel},
         status.HTTP_409_CONFLICT: {"model": ErrorResponseModel}
-}
+    }
 
     # TODO довести модели ошибок до ума
 )

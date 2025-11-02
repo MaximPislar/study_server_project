@@ -69,7 +69,10 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+    to_encode.update({
+        "exp": expire,
+        "type": ACCESS_TOKEN
+    })
     encoded_jwt = jwt.encode(
         payload=to_encode,
         key=settings.auth.private_key_path.read_text(),

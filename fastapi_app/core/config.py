@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import timedelta
 
 from pydantic import BaseModel
 from pydantic_settings import (
@@ -22,7 +23,8 @@ class AuthJWT(BaseModel):
     private_key_path: Path = BASE_DIR / "private.pem"
     public_key_path: Path = BASE_DIR / "public.pem"
     algorithm: str = "RS256"
-    access_token_expire_minutes: int = 15
+    access_token_expire_minutes: timedelta = timedelta(minutes=15)
+    refresh_token_expire_days: timedelta = timedelta(days=1)
 
 
 class Settings(BaseSettings):

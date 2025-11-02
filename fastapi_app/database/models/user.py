@@ -18,3 +18,4 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
     is_active: Mapped[bool] = mapped_column(server_default=true(), nullable=False)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False, server_default=func.now())
+    # TODO время создания пользователя в UTC

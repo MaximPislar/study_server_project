@@ -5,7 +5,7 @@ import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from fastapi_app.core import settings
+from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.database import User
 from fastapi_app.exceptions_and_handlers import UserIsInactiveException
 
@@ -38,7 +38,6 @@ async def authenticate_user(
         username: str,
         password: str
 ) -> User | bool:
-
     user = await verify_user(
         session=session,
         username=username
@@ -80,4 +79,21 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     )
     return encoded_jwt
 
+
+def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        expire = datetime.now(timezone.utc) + timedelta(days=1)
+    to_encode.update({
+        "exp": expire,
+        "type": REFRESH_TOKEN
+    })
+    encoded_jwt = jwt.encode(
+        payload=to_encode,
+        key=settings.auth.private_key_path.read_text(),
+        algorithm=settings.auth.algorithm
+    )
+    return encoded_jwt
 

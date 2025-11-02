@@ -4,6 +4,7 @@ import jwt
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import SQLAlchemyError
 
 from fastapi_app.auth.utils import decode_access_token
 from fastapi_app.database import db_helper, User
@@ -34,7 +35,11 @@ async def get_current_active_user_from_token(
             detail="Invalid token"
         )
 
-    user = await session.get(User, payload.sub)
+    try:
+        user = await session.get(User, payload.get("sub"))
+    except SQLAlchemyError as e:
+        print(e)    # TODO нормальная обработка ошибок при работе с бд
+        user = None
 
     if user is None:
         raise InvalidUserDataException(

@@ -11,7 +11,7 @@ from fastapi_app.database import db_helper, User
 from fastapi_app.exceptions_and_handlers import InvalidTokenException, InvalidUserDataException
 from fastapi_app.core import ACCESS_TOKEN
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/security/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 async def get_current_active_user_from_token(

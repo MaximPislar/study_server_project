@@ -16,12 +16,12 @@ from fastapi_app.auth import authenticate_user, create_jwt
 
 
 router = APIRouter(
-    prefix="/security",
-    tags=["Security"]
+    prefix="/auth",
+    tags=["auth"]
 )
 
 
-@router.post("/token", response_model=Token)
+@router.post("/login", response_model=Token)
 async def login(
         creds: Annotated[OAuth2PasswordRequestForm, Depends()],
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)]

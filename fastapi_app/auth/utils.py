@@ -8,7 +8,6 @@ from sqlalchemy import select
 from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.database import User
 from fastapi_app.exceptions_and_handlers import UserIsInactiveException
-from fastapi_app.schemas import PayloadModel
 
 
 def hash_password(password: str) -> str:

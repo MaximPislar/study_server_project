@@ -8,6 +8,7 @@ from sqlalchemy import select
 from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.database import User
 from fastapi_app.exceptions_and_handlers import UserIsInactiveException
+from fastapi_app.schemas import PayloadModel
 
 
 def hash_password(password: str) -> str:
@@ -97,3 +98,11 @@ def create_refresh_token(data: dict, expires_delta: timedelta | None = None):
     )
     return encoded_jwt
 
+
+def decode_access_token(token: str) -> PayloadModel:
+    payload = jwt.decode(
+        jwt=token,
+        key=settings.auth.public_key_path.read_text(),
+        algorithms=[settings.auth.algorithm]
+    )
+    return PayloadModel(**payload)

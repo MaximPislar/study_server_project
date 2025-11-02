@@ -5,21 +5,13 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi_app.core import settings
+from fastapi_app.auth.utils import decode_acces_token
 from fastapi_app.database import db_helper, User
 from fastapi_app.exceptions_and_handlers import InvalidTokenException, InvalidUserDataException
 from fastapi_app.schemas import PayloadModel
+from fastapi_app.core import ACCESS_TOKEN
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/security/token")
-
-
-def decode_acces_token(token: str) -> PayloadModel:
-    payload = jwt.decode(
-        jwt=token,
-        key=settings.auth.public_key_path.read_text(),
-        algorithms=[settings.auth.algorithm]
-    )
-    return PayloadModel(**payload)
 
 
 async def get_current_active_user_from_token(

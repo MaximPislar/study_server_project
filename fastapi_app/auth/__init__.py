@@ -3,5 +3,6 @@ from .jwt_utils import create_jwt
 
 __all__ = [
     "hash_password",
-    "authenticate_user"
+    "authenticate_user",
+    "create_jwt"
 ]

@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
-from fastapi_app.auth.utils import decode_access_token
+from fastapi_app.auth.jwt_utils import decode_access_token
 from fastapi_app.database import db_helper, User
 from fastapi_app.exceptions_and_handlers import InvalidTokenException, InvalidUserDataException
 from fastapi_app.core import ACCESS_TOKEN

@@ -1,8 +1,9 @@
+import uuid
 from datetime import timedelta, datetime, timezone
 
 import jwt
 
-from fastapi_app.core import settings, TOKEN_TYPE_FIELD
+from fastapi_app.core import settings, TOKEN_TYPE_FIELD, REFRESH_TOKEN
 from fastapi_app.exceptions_and_handlers import InvalidTokenException
 
 
@@ -14,6 +15,13 @@ def create_jwt(data: dict, expires_delta: timedelta, token_type: str):
         "exp": expire,
         "type": token_type
     })
+
+    if token_type == REFRESH_TOKEN:
+        token_id = str(uuid.uuid4())
+        to_encode.update({
+            "jti": token_id
+        })
+
     encoded_jwt = jwt.encode(
         payload=to_encode,
         key=settings.auth.private_key_path.read_text(),

@@ -30,11 +30,12 @@ def create_jwt(data: dict, expires_delta: timedelta, token_type: str):
     return encoded_jwt
 
 
-def decode_access_token(token: str) -> dict:
+def decode_access_token(token: str, verify_signature: bool = True) -> dict:
     payload = jwt.decode(
         jwt=token,
         key=settings.auth.public_key_path.read_text(),
-        algorithms=[settings.auth.algorithm]
+        algorithms=[settings.auth.algorithm],
+        options={"verify_signature": verify_signature}
     )
     return payload
 

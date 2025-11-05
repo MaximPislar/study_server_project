@@ -64,11 +64,21 @@ def verify_token(token: str) -> dict | None:
     return payload
 
 
-def token_type_check(payload: dict, checked_type: str) -> None:
+def token_type_check(token: str, checked_type: str) -> None:
+    try:
+        payload = decode_access_token(
+            token=token,
+            verify_signature=False
+        )
+    except jwt.exceptions.PyJWTError:
+        raise InvalidTokenException(
+            detail="Invalid token format"
+        )
+
     if not payload.get(TOKEN_TYPE_FIELD):
         raise InvalidTokenException
 
     if payload.get(TOKEN_TYPE_FIELD) != checked_type:
         raise InvalidTokenException(
-            detail=f"Invalid token type: {checked_type !r} token required"
+            detail=f"Invalid token type: {checked_type !r} token required, got {payload.get(TOKEN_TYPE_FIELD) !r} token"
         )

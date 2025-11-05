@@ -17,10 +17,8 @@ async def get_current_active_user_from_token(
         token: Annotated[str, Depends(oauth2_scheme)],
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
 ) -> Type[User]:
-
+    token_type_check(token, ACCESS_TOKEN)
     payload: dict = verify_token(token)
-
-    token_type_check(payload, ACCESS_TOKEN)
 
     try:
         user = await session.get(User, payload.get("sub"))

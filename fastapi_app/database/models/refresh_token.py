@@ -1,0 +1,23 @@
+import uuid
+import datetime
+
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import UUID
+
+from fastapi_app.database.models import Base
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    jti: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, index=True, nullable=False)
+    user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
+
+    issued_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())
+    expires_at: Mapped[datetime.datetime] = mapped_column(DateTime, nullable=False)
+
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    # на будущее
+    device_info: Mapped[str] = mapped_column(String, nullable=True)  # optional

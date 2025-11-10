@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
+from fastapi_app.auth import is_jti_allowed
 from fastapi_app.auth.dependencies import get_current_active_user_from_token
 from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.database import db_helper, User

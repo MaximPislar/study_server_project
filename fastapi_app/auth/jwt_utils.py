@@ -7,19 +7,23 @@ from fastapi_app.core import settings, TOKEN_TYPE_FIELD, REFRESH_TOKEN
 from fastapi_app.exceptions_and_handlers import InvalidTokenException
 
 
-def create_jwt(data: dict, expires_delta: timedelta, token_type: str):
+def create_jwt(
+        data: dict,
+        expires_delta: timedelta,
+        token_type: str,
+        jti: str = False
+):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
-
+    # TODO исправить expire
     to_encode.update({
         "exp": expire,
         "type": token_type
     })
 
-    if token_type == REFRESH_TOKEN:
-        token_id = str(uuid.uuid4())
+    if token_type == REFRESH_TOKEN and jti:
         to_encode.update({
-            "jti": token_id
+            "jti": jti
         })
 
     encoded_jwt = jwt.encode(
@@ -30,7 +34,10 @@ def create_jwt(data: dict, expires_delta: timedelta, token_type: str):
     return encoded_jwt
 
 
-def decode_access_token(token: str, verify_signature: bool = True) -> dict:
+def decode_access_token(
+        token: str,
+        verify_signature: bool = True
+) -> dict:
     payload = jwt.decode(
         jwt=token,
         key=settings.auth.public_key_path.read_text(),
@@ -64,7 +71,10 @@ def verify_token(token: str) -> dict | None:
     return payload
 
 
-def token_type_check(token: str, checked_type: str) -> None:
+def token_type_check(
+        token: str,
+        checked_type: str
+) -> None:
     try:
         payload = decode_access_token(
             token=token,

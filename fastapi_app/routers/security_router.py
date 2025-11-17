@@ -41,26 +41,24 @@ async def login(
 
     user_id = str(user.id)
     jti = str(uuid.uuid4())
-    # TODO добавить expire в create_jwt?
-    expire = datetime.now() + settings.auth.refresh_token_expire_days
+    refresh_token_expire = datetime.now() + settings.auth.refresh_token_expire_days
     # TODO проверка на активность
 
     await store_refresh_token(
         session=session,
         jti=jti,
         user_id=user_id,
-        expires_at=expire
+        expires_at=refresh_token_expire
     )
 
     # тут мы создаём jwt токен
     access_token = create_jwt(
         data={"sub": user_id},
-        expires_delta=settings.auth.access_token_expire_minutes,
         token_type=ACCESS_TOKEN
     )
     refresh_token = create_jwt(
         data={"sub": user_id},
-        expires_delta=settings.auth.refresh_token_expire_days,
+        expire=refresh_token_expire,
         token_type=REFRESH_TOKEN,
         jti=jti
     )
@@ -107,12 +105,6 @@ async def refresh(
     # TODO добавить expire в create_jwt?
     expire = datetime.now() + settings.auth.refresh_token_expire_days
 
-    refresh_token = create_jwt(
-        data=data,
-        expires_delta=settings.auth.refresh_token_expire_days,
-        token_type=REFRESH_TOKEN,
-        jti=new_jti
-    )
     # сохранить новый рефреш в бд
     # TODO при выдаче нового токена, ревокать ВСЕ токены из базы. Или пора внедрять сессию
     await store_refresh_token(
@@ -124,8 +116,14 @@ async def refresh(
 
     access_token = create_jwt(
         data=data,
-        expires_delta=settings.auth.access_token_expire_minutes,
         token_type=ACCESS_TOKEN
+    )
+
+    refresh_token = create_jwt(
+        data=data,
+        expire=expire,
+        token_type=REFRESH_TOKEN,
+        jti=new_jti
     )
 
     return Token(

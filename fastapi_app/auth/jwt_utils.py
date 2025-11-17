@@ -9,19 +9,20 @@ from fastapi_app.exceptions_and_handlers import InvalidTokenException
 
 def create_jwt(
         data: dict,
-        expires_delta: timedelta,
         token_type: str,
-        jti: str = False
+        jti: str = False,
+        expire: datetime = None
 ):
+    if not expire:
+        expire = datetime.now() + settings.auth.access_token_expire_minutes
+
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
-    # TODO исправить expire
     to_encode.update({
         "exp": expire,
         "type": token_type
     })
 
-    if token_type == REFRESH_TOKEN and jti:
+    if jti:
         to_encode.update({
             "jti": jti
         })

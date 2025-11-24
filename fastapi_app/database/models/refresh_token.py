@@ -21,3 +21,13 @@ class RefreshToken(Base):
     revoked: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     # на будущее
     device_info: Mapped[str] = mapped_column(String, nullable=True)  # optional
+
+    @property
+    def user_id_str(self):
+        """Возвращает ID как строку"""
+        return str(self.user_id) if self.user_id else None
+
+    @property
+    def jti_str(self):
+        """Возвращает JTI как строку"""
+        return str(self.jti) if self.jti else None

@@ -12,7 +12,7 @@ class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
     id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    jti: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, index=True, nullable=False)
+    jti: Mapped[UUID] = mapped_column(UUID(as_uuid=True), unique=True, index=True, nullable=False, default=uuid.uuid4)
     user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), index=True, nullable=False)
 
     issued_at: Mapped[datetime.datetime] = mapped_column(DateTime, server_default=func.now())

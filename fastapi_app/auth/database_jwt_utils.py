@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +22,6 @@ async def is_jti_allowed(
         return False
     if refresh_token_in_db.revoked:
         return False
-    if refresh_token_in_db.expires_at < datetime.datetime.utcnow():
+    if refresh_token_in_db.expires_at < datetime.now(timezone.utc):
         return False
     return True

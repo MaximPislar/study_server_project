@@ -14,7 +14,7 @@ def create_jwt(
         expire: datetime = None
 ):
     if not expire:
-        expire = datetime.now() + settings.auth.access_token_expire_minutes
+        expire = datetime.now(timezone.utc) + settings.auth.access_token_expire_minutes
 
     to_encode = data.copy()
     to_encode.update({

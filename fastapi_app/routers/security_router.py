@@ -39,9 +39,7 @@ async def login(
             detail="Invalid username or password"
         )
 
-    user_id = str(user.id)
-    jti = str(uuid.uuid4())
-    refresh_token_expire = datetime.now() + settings.auth.refresh_token_expire_days
+    jwt_expire_at = datetime.now(timezone.utc) + settings.auth.refresh_token_expire_days
     # TODO проверка на активность
 
     await store_refresh_token(

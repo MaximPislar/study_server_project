@@ -1,5 +1,5 @@
 import uuid
-from datetime import timedelta, datetime, timezone
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,8 +12,9 @@ from fastapi_app.auth.dependencies import get_current_active_user_from_token
 from fastapi_app.auth.jwt_utils import verify_token, token_type_check
 from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
 from fastapi_app.crud import revoke_refresh_token, store_refresh_token
-from fastapi_app.database import db_helper, User
+from fastapi_app.database import db_helper, User, RefreshToken
 from fastapi_app.schemas import UserResponse, ErrorResponseModel, RefreshRequest
+from fastapi_app.schemas.refresh_jwt_payload import RefreshJWTPayload
 from fastapi_app.schemas.token import Token
 from fastapi_app.exceptions_and_handlers import InvalidCredentialsException
 from fastapi_app.auth import authenticate_user, create_jwt
@@ -42,23 +43,21 @@ async def login(
     jwt_expire_at = datetime.now(timezone.utc) + settings.auth.refresh_token_expire_days
     # TODO проверка на активность
 
-    await store_refresh_token(
+    refresh_token_in_db: RefreshToken = await store_refresh_token(
         session=session,
-        jti=jti,
-        user_id=user_id,
-        expires_at=refresh_token_expire
+        user_id=user.id,
+        expires_at=jwt_expire_at
     )
 
-    # тут мы создаём jwt токен
     access_token = create_jwt(
-        data={"sub": user_id},
+        data={"sub": refresh_token_in_db.user_id_str},
         token_type=ACCESS_TOKEN
     )
     refresh_token = create_jwt(
-        data={"sub": user_id},
-        expire=refresh_token_expire,
+        data={"sub": refresh_token_in_db.user_id_str},
+        expire=refresh_token_in_db.expires_at,
         token_type=REFRESH_TOKEN,
-        jti=jti
+        jti=refresh_token_in_db.jti_str
     )
 
     return Token(
@@ -74,10 +73,10 @@ async def refresh(
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
 ):
     token_type_check(request.token, REFRESH_TOKEN)
-    payload: dict = verify_token(request.token)
+    payload = RefreshJWTPayload(**verify_token(request.token))
     # TODO проверка на активность
 
-    jti = payload.get("jti")
+    jti = payload.jti
     if not jti:
         raise HTTPException(    # TODO инвалид токен?
             status_code=status.HTTP_404_NOT_FOUND,
@@ -98,30 +97,25 @@ async def refresh(
         session=session,
         jti=jti
     )
-    new_jti = str(uuid.uuid4())
-    data = {"sub": payload.get("sub")}
-    # TODO добавить expire в create_jwt?
-    expire = datetime.now() + settings.auth.refresh_token_expire_days
 
     # сохранить новый рефреш в бд
     # TODO при выдаче нового токена, ревокать ВСЕ токены из базы. Или пора внедрять сессию
-    await store_refresh_token(
+    refresh_token_in_db: RefreshToken = await store_refresh_token(
         session=session,
-        jti=new_jti,
-        user_id=data["sub"],
-        expires_at=expire     # TODO не бесконечная рефреш сессия
+        user_id=payload.sub,
+        expires_at=payload.exp     # TODO не бесконечная рефреш сессия
     )
 
     access_token = create_jwt(
-        data=data,
+        data={"sub": refresh_token_in_db.user_id_str},
         token_type=ACCESS_TOKEN
     )
 
     refresh_token = create_jwt(
-        data=data,
-        expire=expire,
+        data={"sub": refresh_token_in_db.user_id_str},
+        expire=refresh_token_in_db.expires_at,
         token_type=REFRESH_TOKEN,
-        jti=new_jti
+        jti=refresh_token_in_db.jti_str
     )
 
     return Token(

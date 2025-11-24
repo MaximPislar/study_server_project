@@ -9,13 +9,11 @@ from fastapi_app.database.models import RefreshToken
 
 async def store_refresh_token(
         session: AsyncSession,
-        jti: str,
         user_id: str,
         expires_at: datetime.datetime,
         device_info: str | None = None
 ) -> RefreshToken:
     refresh_token = RefreshToken(
-        jti=jti,
         user_id=user_id,
         expires_at=expires_at,
         device_info=device_info

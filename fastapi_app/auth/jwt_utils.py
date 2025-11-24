@@ -10,7 +10,7 @@ from fastapi_app.exceptions_and_handlers import InvalidTokenException
 def create_jwt(
         data: dict,
         token_type: str,
-        jti: str = False,
+        jti: str = None,
         expire: datetime = None
 ):
     if not expire:
@@ -35,7 +35,7 @@ def create_jwt(
     return encoded_jwt
 
 
-def decode_access_token(
+def decode_token(
         token: str,
         verify_signature: bool = True
 ) -> dict:
@@ -50,7 +50,7 @@ def decode_access_token(
 
 def verify_token(token: str) -> dict | None:
     try:
-        payload: dict = decode_access_token(token)
+        payload: dict = decode_token(token)
 
     except jwt.exceptions.DecodeError:
         raise InvalidTokenException(
@@ -77,7 +77,7 @@ def token_type_check(
         checked_type: str
 ) -> None:
     try:
-        payload = decode_access_token(
+        payload = decode_token(
             token=token,
             verify_signature=False
         )

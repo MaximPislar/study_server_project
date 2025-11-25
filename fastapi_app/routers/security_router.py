@@ -103,7 +103,7 @@ async def refresh(
     refresh_token_in_db: RefreshToken = await store_refresh_token(
         session=session,
         user_id=payload.sub,
-        expires_at=payload.exp     # TODO не бесконечная рефреш сессия
+        expires_at=payload.exp
     )
 
     access_token = create_jwt(

@@ -1,23 +1,25 @@
-import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
 
 from fastapi_app.auth import is_jti_allowed
 from fastapi_app.auth.dependencies import get_current_active_user_from_token
 from fastapi_app.auth.jwt_utils import verify_token, token_type_check
 from fastapi_app.core import settings, ACCESS_TOKEN, REFRESH_TOKEN
-from fastapi_app.crud import revoke_refresh_token, store_refresh_token
+from fastapi_app.crud import revoke_refresh_token_by_jti, store_refresh_token, revoke_tokens_by_jti_and_device_info
 from fastapi_app.database import db_helper, User, RefreshToken
 from fastapi_app.schemas import UserResponse, ErrorResponseModel, RefreshRequest
 from fastapi_app.schemas.refresh_jwt_payload import RefreshJWTPayload
 from fastapi_app.schemas.token import Token
 from fastapi_app.exceptions_and_handlers import InvalidCredentialsException
 from fastapi_app.auth import authenticate_user, create_jwt
+from fastapi_app.auth.utils import collect_client_device_info
+
 
 router = APIRouter(
     prefix="/auth",
@@ -27,6 +29,7 @@ router = APIRouter(
 
 @router.post("/login", response_model=Token)
 async def login(
+        request: Request,
         creds: Annotated[OAuth2PasswordRequestForm, Depends()],
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
 ):
@@ -40,13 +43,16 @@ async def login(
             detail="Invalid username or password"
         )
 
+    device_info = collect_client_device_info(request)
+
     jwt_expire_at = datetime.now(timezone.utc) + settings.auth.refresh_token_expire_days
     # TODO проверка на активность
 
     refresh_token_in_db: RefreshToken = await store_refresh_token(
         session=session,
         user_id=user.id,
-        expires_at=jwt_expire_at
+        expires_at=jwt_expire_at,
+        device_info=device_info
     )
 
     access_token = create_jwt(
@@ -69,11 +75,12 @@ async def login(
 
 @router.post("/refresh", response_model=Token)
 async def refresh(
-        request: RefreshRequest,
+        request: Request,
+        refresh_body: RefreshRequest,
         session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
 ):
-    token_type_check(request.token, REFRESH_TOKEN)
-    payload = RefreshJWTPayload(**verify_token(request.token))
+    token_type_check(refresh_body.token, REFRESH_TOKEN)
+    payload = RefreshJWTPayload(**verify_token(refresh_body.token))
     # TODO проверка на активность
 
     jti = payload.jti
@@ -85,6 +92,8 @@ async def refresh(
     # TODO сессии ?
     # проверить jti. если jti уже revoked -> возможно replay attack — отозвать все сессии
 
+    device_info = collect_client_device_info(request)
+
     allowed = is_jti_allowed(token=jwt_from_db)
     if not allowed:
         # либо просто отказать:
@@ -92,10 +101,11 @@ async def refresh(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token revoked or unknown"
         )
-    # отозвать старый рефреш
-    await revoke_refresh_token(
+
+    await revoke_tokens_by_jti_and_device_info(
         session=session,
-        jti=jti
+        jti=jti,
+        device_info=device_info
     )
 
     # сохранить новый рефреш в бд

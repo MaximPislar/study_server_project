@@ -85,7 +85,7 @@ async def refresh(
     # TODO сессии ?
     # проверить jti. если jti уже revoked -> возможно replay attack — отозвать все сессии
 
-    allowed = await is_jti_allowed(session, jti)
+    allowed = is_jti_allowed(token=jwt_from_db)
     if not allowed:
         # либо просто отказать:
         raise HTTPException(

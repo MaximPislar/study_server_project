@@ -6,22 +6,19 @@ from fastapi_app.database.models import RefreshToken
 from sqlalchemy import select
 
 
-async def is_jti_allowed(
-        session: AsyncSession,
-        jti: str
-) -> bool:
+def is_jti_allowed(token: RefreshToken | None) -> bool:
 
-    stmt = select(RefreshToken).where(
-        RefreshToken.jti == jti
-    )
-    result = await session.execute(stmt)
+    # stmt = select(RefreshToken).where(
+    #     RefreshToken.jti == jti
+    # )
+    # result = await session.execute(stmt)
+    #
+    # refresh_token_in_db: RefreshToken | None = result.scalar_one_or_none()
 
-    refresh_token_in_db: RefreshToken | None = result.scalar_one_or_none()
-
-    if not refresh_token_in_db:
+    if not token:
         return False
-    if refresh_token_in_db.revoked:
+    if token.revoked:
         return False
-    if refresh_token_in_db.expires_at < datetime.now(timezone.utc):
+    if token.expires_at < datetime.now(timezone.utc):
         return False
     return True

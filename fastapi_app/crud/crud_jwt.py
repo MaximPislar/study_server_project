@@ -1,7 +1,7 @@
 import datetime
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi_app.database.models import RefreshToken
@@ -24,7 +24,7 @@ async def store_refresh_token(
     return refresh_token
 
 
-async def revoke_refresh_token(
+async def revoke_refresh_token_by_jti(
         session: AsyncSession,
         jti: str
 ) -> None:
@@ -45,3 +45,20 @@ async def revoke_refresh_token(
             detail="JWT not found"
         )
 
+
+async def revoke_tokens_by_jti_and_device_info(session, jti, device_info):
+    stmt = update(RefreshToken).where(
+        RefreshToken.jti == jti,
+        RefreshToken.device_info == device_info
+    ).values(revoked=True)
+
+    result = await session.execute(stmt)
+    await session.commit()
+
+    if result.rowcount == 0:
+        await revoke_refresh_token_by_jti(session, jti)
+
+        raise HTTPException(  # TODO сделать с этим что-то
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Device info changed. Please relogin"
+        )
